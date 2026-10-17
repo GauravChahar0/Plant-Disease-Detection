@@ -1,0 +1,1473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PlantGuard AI — Plant Disease Detection</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/static/css/style.css" />
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌿</text></svg>" />
+    <script>
+        (function() {
+            try {
+                const savedTheme = localStorage.getItem('plantguard_theme');
+                if (savedTheme === 'dark' || (!savedTheme && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                } else {
+                    document.documentElement.setAttribute('data-theme', 'light');
+                }
+            } catch(e) {}
+        })();
+    </script>
+    <style>
+    /* ─── PlantGuard Theme System & Enhancements ─── */
+    :root {
+        --theme-transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+        --faq-card-bg: #ffffff;
+        --faq-card-border: #e2e8f0;
+        --faq-card-shadow: 0 4px 16px -2px rgba(15, 23, 42, 0.05);
+        --faq-card-hover-border: #86efac;
+        --faq-card-active-border: #16a34a;
+        --faq-card-active-bg: #ffffff;
+        --faq-tag-bg: #f0fdf4;
+        --faq-tag-color: #15803d;
+        --faq-tag-border: #bbf7d0;
+        --faq-chevron-bg: #f1f5f9;
+        --faq-chevron-color: #475569;
+        --faq-chevron-active-bg: #16a34a;
+        --faq-chevron-active-color: #ffffff;
+        --faq-section-bg: #f8fafc;
+        --nav-glass-bg: rgba(255, 255, 255, 0.85);
+        --nav-scrolled-bg: rgba(255, 255, 255, 0.96);
+        --nav-border: rgba(0, 0, 0, 0.06);
+        --modal-overlay: rgba(15, 23, 42, 0.7);
+        --modal-bg: #ffffff;
+        --modal-border: #e2e8f0;
+    }
+
+    [data-theme="dark"] {
+        --dark: #f8fafc;
+        --dark-2: #e2e8f0;
+        --dark-3: #94a3b8;
+        --gray: #94a3b8;
+        --gray-light: #64748b;
+        --gray-lighter: #334155;
+        --gray-lightest: #1e293b;
+        --light: #0a0f1d;
+        --white: #111a2e;
+
+        --faq-card-bg: #111a2e;
+        --faq-card-border: #1e293b;
+        --faq-card-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.5);
+        --faq-card-hover-border: #22c55e;
+        --faq-card-active-border: #22c55e;
+        --faq-card-active-bg: #14223b;
+        --faq-tag-bg: rgba(34, 197, 94, 0.14);
+        --faq-tag-color: #4ade80;
+        --faq-tag-border: rgba(34, 197, 94, 0.35);
+        --faq-chevron-bg: #1e293b;
+        --faq-chevron-color: #94a3b8;
+        --faq-chevron-active-bg: #22c55e;
+        --faq-chevron-active-color: #0b1120;
+        --faq-section-bg: #070c18;
+        --nav-glass-bg: rgba(10, 15, 29, 0.85);
+        --nav-scrolled-bg: rgba(10, 15, 29, 0.95);
+        --nav-border: rgba(255, 255, 255, 0.08);
+        --modal-overlay: rgba(0, 0, 0, 0.82);
+        --modal-bg: #111a2e;
+        --modal-border: #25334c;
+    }
+
+    /* Theme global transitions */
+    body {
+        transition: var(--theme-transition);
+    }
+
+    [data-theme="dark"] body {
+        background-color: var(--light);
+        color: var(--dark-2);
+    }
+
+    [data-theme="dark"] .navbar {
+        background: var(--nav-glass-bg);
+        border-bottom: 1px solid var(--nav-border);
+    }
+    [data-theme="dark"] .navbar.scrolled {
+        background: var(--nav-scrolled-bg);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    }
+    [data-theme="dark"] .nav-links a {
+        color: var(--gray);
+    }
+    [data-theme="dark"] .nav-links a:hover {
+        color: #4ade80;
+        background: rgba(34, 197, 94, 0.12);
+    }
+    [data-theme="dark"] .nav-toggle span {
+        background: var(--dark);
+    }
+    @media (max-width: 768px) {
+        [data-theme="dark"] .nav-links {
+            background: var(--white);
+            border: 1px solid var(--nav-border);
+        }
+    }
+
+    [data-theme="dark"] .hero-bg {
+        background: linear-gradient(160deg, #070c18 0%, #0d1728 40%, #071322 70%, #0a0f1d 100%);
+    }
+    [data-theme="dark"] .hero-badge {
+        background: #111a2e;
+        border-color: rgba(34, 197, 94, 0.35);
+        color: #4ade80;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+    }
+    [data-theme="dark"] .hero-stats {
+        background: rgba(17, 26, 46, 0.7);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    }
+
+    [data-theme="dark"] .upload-card,
+    [data-theme="dark"] .results-card,
+    [data-theme="dark"] .step-card {
+        background: var(--white);
+        border-color: var(--gray-lightest);
+        box-shadow: 0 8px 24px -4px rgba(0,0,0,0.5);
+    }
+    [data-theme="dark"] .upload-zone {
+        border-color: #25334c;
+        background: rgba(7, 12, 24, 0.5);
+    }
+    [data-theme="dark"] .plant-card {
+        background: var(--white);
+        border-color: var(--gray-lightest);
+    }
+    [data-theme="dark"] .plant-card:hover {
+        border-color: #22c55e;
+        box-shadow: 0 12px 30px -4px rgba(0, 0, 0, 0.6);
+    }
+    [data-theme="dark"] .btn-outline {
+        border-color: #25334c;
+        color: var(--dark);
+    }
+    [data-theme="dark"] .btn-outline:hover {
+        border-color: #22c55e;
+        color: #4ade80;
+        background: rgba(34, 197, 94, 0.08);
+    }
+    [data-theme="dark"] .plants-section {
+        background: var(--light);
+    }
+
+    /* ─── Navbar Actions & Toggle ─── */
+    .nav-actions {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .theme-toggle-btn {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        border: 1px solid var(--faq-card-border);
+        background: var(--faq-chevron-bg);
+        color: var(--dark);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.25s ease;
+        padding: 0;
+    }
+    .theme-toggle-btn:hover {
+        background: var(--primary-50);
+        border-color: var(--primary);
+        transform: rotate(15deg) scale(1.06);
+    }
+    [data-theme="dark"] .theme-toggle-btn:hover {
+        background: rgba(34, 197, 94, 0.16);
+        border-color: #22c55e;
+    }
+    .theme-toggle-btn .sun-icon { display: none; }
+    .theme-toggle-btn .moon-icon { display: flex; align-items: center; justify-content: center; }
+    [data-theme="dark"] .theme-toggle-btn .sun-icon { display: flex; align-items: center; justify-content: center; color: #facc15; }
+    [data-theme="dark"] .theme-toggle-btn .moon-icon { display: none; }
+
+    .nav-download-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 7px 14px !important;
+        background: rgba(22, 163, 74, 0.1);
+        color: var(--primary-dark) !important;
+        border: 1px solid rgba(22, 163, 74, 0.25);
+        border-radius: 100px !important;
+        font-weight: 600 !important;
+        font-size: 0.88rem !important;
+        transition: all 0.25s ease;
+    }
+    [data-theme="dark"] .nav-download-link {
+        background: rgba(34, 197, 94, 0.14);
+        color: #4ade80 !important;
+        border-color: rgba(34, 197, 94, 0.35);
+    }
+    .nav-download-link:hover {
+        background: var(--primary) !important;
+        color: #ffffff !important;
+        border-color: var(--primary);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(22, 163, 74, 0.25);
+    }
+
+    /* ─── Plants Section Header Row & App Badge ─── */
+    .plants-header-row {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 24px;
+        margin-bottom: 48px;
+        flex-wrap: wrap;
+    }
+    .plants-header-left {
+        margin-bottom: 0 !important;
+        text-align: left !important;
+    }
+    .plants-header-left .section-desc {
+        margin-left: 0 !important;
+    }
+    .plants-app-badge-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 14px;
+        padding: 12px 22px;
+        background: linear-gradient(135deg, #16a34a 0%, #059669 100%);
+        color: #ffffff !important;
+        border-radius: 14px;
+        box-shadow: 0 6px 20px -3px rgba(22, 163, 74, 0.35);
+        transition: all 0.25s ease;
+        text-decoration: none;
+        cursor: pointer;
+    }
+    .plants-app-badge-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 28px -2px rgba(22, 163, 74, 0.45);
+        filter: brightness(1.05);
+    }
+    .app-badge-icon {
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.22);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #ffffff;
+    }
+    .app-badge-text {
+        display: flex;
+        flex-direction: column;
+    }
+    .app-badge-sub {
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        opacity: 0.9;
+        font-weight: 600;
+    }
+    .app-badge-title {
+        font-size: 0.96rem;
+        font-weight: 700;
+    }
+
+    /* ─── FAQ Section Styles ─── */
+    .faq-section {
+        background: var(--faq-section-bg);
+        position: relative;
+        padding: 100px 0;
+        transition: background-color 0.3s ease;
+    }
+    .faq-container {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+    .faq-filters {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 36px;
+    }
+    .faq-filter-btn {
+        padding: 8px 18px;
+        border-radius: 100px;
+        background: var(--faq-card-bg);
+        border: 1px solid var(--faq-card-border);
+        color: var(--gray);
+        font-size: 0.88rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        box-shadow: var(--shadow-sm);
+    }
+    .faq-filter-btn:hover {
+        color: var(--primary);
+        border-color: var(--primary);
+        transform: translateY(-1px);
+    }
+    .faq-filter-btn.active {
+        background: var(--primary);
+        color: #ffffff;
+        border-color: var(--primary);
+        box-shadow: 0 4px 14px rgba(22, 163, 74, 0.28);
+    }
+    [data-theme="dark"] .faq-filter-btn.active {
+        background: #16a34a;
+        color: #ffffff;
+        box-shadow: 0 4px 14px rgba(34, 197, 94, 0.3);
+    }
+
+    .faq-list {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+    }
+    .faq-item {
+        background: var(--faq-card-bg);
+        border: 1px solid var(--faq-card-border);
+        border-radius: 16px;
+        box-shadow: var(--faq-card-shadow);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        overflow: hidden;
+        position: relative;
+    }
+    .faq-item:hover {
+        border-color: var(--faq-card-hover-border);
+        box-shadow: 0 10px 28px -4px rgba(22, 163, 74, 0.12);
+        transform: translateY(-2px);
+    }
+    [data-theme="dark"] .faq-item:hover {
+        box-shadow: 0 10px 28px -4px rgba(0, 0, 0, 0.6);
+    }
+    .faq-item.active {
+        border-color: var(--faq-card-active-border);
+        background: var(--faq-card-active-bg);
+        box-shadow: 0 12px 32px -4px rgba(22, 163, 74, 0.15);
+    }
+    .faq-item.active::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 4px;
+        background: linear-gradient(180deg, var(--primary), var(--accent));
+    }
+
+    .faq-question {
+        width: 100%;
+        padding: 22px 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        background: none;
+        border: none;
+        cursor: pointer;
+        text-align: left;
+        color: inherit;
+        font-family: var(--font-sans);
+    }
+    .faq-q-left {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        flex: 1;
+    }
+    .faq-cat-pill {
+        display: inline-flex;
+        align-items: center;
+        padding: 4px 10px;
+        border-radius: 100px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        background: var(--faq-tag-bg);
+        color: var(--faq-tag-color);
+        border: 1px solid var(--faq-tag-border);
+        white-space: nowrap;
+        letter-spacing: 0.02em;
+    }
+    .faq-q-title {
+        font-size: 1.05rem;
+        font-weight: 600;
+        color: var(--dark);
+        line-height: 1.45;
+        transition: color 0.2s ease;
+    }
+    .faq-item.active .faq-q-title {
+        color: var(--primary);
+    }
+    [data-theme="dark"] .faq-item.active .faq-q-title {
+        color: #4ade80;
+    }
+
+    .faq-chevron-wrap {
+        width: 36px;
+        height: 36px;
+        min-width: 36px;
+        border-radius: 50%;
+        background: var(--faq-chevron-bg);
+        color: var(--faq-chevron-color);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .faq-chevron-wrap svg {
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .faq-item.active .faq-chevron-wrap {
+        background: var(--faq-chevron-active-bg);
+        color: var(--faq-chevron-active-color);
+    }
+    .faq-item.active .faq-chevron-wrap svg {
+        transform: rotate(180deg);
+    }
+
+    .faq-answer-collapse {
+        display: grid;
+        grid-template-rows: 0fr;
+        transition: grid-template-rows 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .faq-item.active .faq-answer-collapse {
+        grid-template-rows: 1fr;
+    }
+    .faq-answer-body {
+        overflow: hidden;
+        padding: 0 24px 22px 24px;
+        color: var(--gray);
+        font-size: 0.95rem;
+        line-height: 1.75;
+        border-top: 1px solid transparent;
+    }
+    .faq-item.active .faq-answer-body {
+        border-top-color: var(--faq-card-border);
+        padding-top: 16px;
+    }
+    .faq-answer-body strong {
+        color: var(--dark);
+        font-weight: 600;
+    }
+    .faq-tips-list {
+        margin-top: 12px;
+        padding-left: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+    .faq-tips-list li {
+        line-height: 1.6;
+    }
+
+    /* FAQ CTA Box */
+    .faq-cta-card {
+        margin-top: 48px;
+        padding: 32px 36px;
+        border-radius: 20px;
+        background: linear-gradient(135deg, rgba(22, 163, 74, 0.08) 0%, rgba(5, 150, 105, 0.12) 100%);
+        border: 1px solid rgba(22, 163, 74, 0.22);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 28px;
+        flex-wrap: wrap;
+    }
+    [data-theme="dark"] .faq-cta-card {
+        background: linear-gradient(135deg, rgba(34, 197, 94, 0.08) 0%, rgba(5, 150, 105, 0.14) 100%);
+        border-color: rgba(34, 197, 94, 0.25);
+    }
+    .faq-cta-icon-wrap {
+        width: 54px;
+        height: 54px;
+        min-width: 54px;
+        border-radius: 14px;
+        background: var(--white);
+        box-shadow: var(--shadow-sm);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.75rem;
+    }
+    .faq-cta-text {
+        flex: 1;
+        min-width: 240px;
+    }
+    .faq-cta-text h4 {
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: var(--dark);
+        margin-bottom: 6px;
+    }
+    .faq-cta-text p {
+        font-size: 0.92rem;
+        color: var(--gray);
+        line-height: 1.6;
+        margin: 0;
+    }
+    .faq-cta-btn {
+        white-space: nowrap;
+    }
+
+    /* ─── Download Modal ─── */
+    .modal-backdrop {
+        position: fixed;
+        inset: 0;
+        background: var(--modal-overlay);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        z-index: 2000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+    }
+    .modal-backdrop.open {
+        opacity: 1;
+        visibility: visible;
+    }
+    .modal-card {
+        background: var(--modal-bg);
+        border: 1px solid var(--modal-border);
+        border-radius: 24px;
+        width: 100%;
+        max-width: 560px;
+        padding: 36px 32px 32px;
+        box-shadow: 0 25px 60px -10px rgba(0, 0, 0, 0.3);
+        position: relative;
+        transform: translateY(20px) scale(0.96);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .modal-backdrop.open .modal-card {
+        transform: translateY(0) scale(1);
+    }
+    .modal-close-btn {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: var(--faq-chevron-bg);
+        border: none;
+        color: var(--dark);
+        font-size: 1.4rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+    }
+    .modal-close-btn:hover {
+        background: #ef4444;
+        color: #ffffff;
+    }
+    .modal-header {
+        display: flex;
+        gap: 16px;
+        align-items: flex-start;
+        margin-bottom: 24px;
+    }
+    .modal-icon-badge {
+        font-size: 2.2rem;
+        width: 56px;
+        height: 56px;
+        border-radius: 16px;
+        background: var(--primary-50);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    [data-theme="dark"] .modal-icon-badge {
+        background: rgba(34, 197, 94, 0.15);
+    }
+    .modal-badge-pill {
+        display: inline-block;
+        padding: 4px 10px;
+        border-radius: 100px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        background: var(--faq-tag-bg);
+        color: var(--faq-tag-color);
+        border: 1px solid var(--faq-tag-border);
+        margin-bottom: 6px;
+    }
+    .modal-title-group h3 {
+        font-size: 1.35rem;
+        font-weight: 800;
+        color: var(--dark);
+        margin-bottom: 4px;
+    }
+    .modal-title-group p {
+        font-size: 0.9rem;
+        color: var(--gray);
+        line-height: 1.5;
+    }
+    .modal-options-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+        margin-bottom: 20px;
+    }
+    @media (max-width: 540px) {
+        .modal-options-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+    .download-opt-card {
+        background: var(--faq-section-bg);
+        border: 1px solid var(--faq-card-border);
+        border-radius: 16px;
+        padding: 18px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+    .opt-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 10px;
+    }
+    .opt-platform-icon {
+        font-size: 1.6rem;
+    }
+    .opt-header h4 {
+        font-size: 0.98rem;
+        font-weight: 700;
+        color: var(--dark);
+    }
+    .opt-meta {
+        font-size: 0.75rem;
+        color: var(--gray);
+    }
+    .opt-desc {
+        font-size: 0.82rem;
+        color: var(--gray);
+        line-height: 1.5;
+        margin-bottom: 14px;
+    }
+    .btn-full {
+        width: 100%;
+        padding: 10px 16px;
+        font-size: 0.88rem;
+    }
+    .modal-qr-section {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 16px 20px;
+        background: var(--faq-section-bg);
+        border: 1px dashed var(--faq-card-border);
+        border-radius: 14px;
+    }
+    .qr-mockup {
+        border-radius: 8px;
+        overflow: hidden;
+        border: 1px solid var(--faq-card-border);
+    }
+    .qr-text strong {
+        display: block;
+        font-size: 0.9rem;
+        color: var(--dark);
+        margin-bottom: 2px;
+    }
+    .qr-text span {
+        font-size: 0.8rem;
+        color: var(--gray);
+        line-height: 1.4;
+    }
+
+    @media (max-width: 768px) {
+        .plants-header-row {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        .faq-q-left {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 8px;
+        }
+        .faq-cta-card {
+            flex-direction: column;
+            text-align: center;
+        }
+        .faq-cta-icon-wrap {
+            margin: 0 auto;
+        }
+        .faq-cta-btn {
+            width: 100%;
+        }
+    }
+    </style>
+</head>
+<body>
+    <!-- ═══════════════════ NAVBAR ═══════════════════ -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <a href="#" class="nav-logo">
+                <span class="logo-icon">🌿</span>
+                <span class="logo-text">PlantGuard<span class="logo-accent">AI</span></span>
+            </a>
+            <ul class="nav-links">
+                <li><a href="#home">Home</a></li>
+                <li><a href="#detect">Detect</a></li>
+                <li><a href="#how-it-works">How It Works</a></li>
+                <li><a href="#plants">Plants</a></li>
+                <li>
+                    <a href="#downloadModal" class="nav-download-link" id="navDownloadBtn">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
+                            <line x1="12" y1="18" x2="12.01" y2="18"></line>
+                        </svg>
+                        Download App
+                    </a>
+                </li>
+                <li><a href="#faqSection">FAQs</a></li>
+            </ul>
+            <div class="nav-actions">
+                <button class="theme-toggle-btn" id="themeToggleBtn" type="button" aria-label="Toggle light/dark mode" title="Toggle theme">
+                    <span class="theme-icon sun-icon">
+                        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="5"></circle>
+                            <line x1="12" y1="1" x2="12" y2="3"></line>
+                            <line x1="12" y1="21" x2="12" y2="23"></line>
+                            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                            <line x1="1" y1="12" x2="3" y2="12"></line>
+                            <line x1="21" y1="12" x2="23" y2="12"></line>
+                            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                        </svg>
+                    </span>
+                    <span class="theme-icon moon-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                        </svg>
+                    </span>
+                </button>
+                <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
+                    <span></span><span></span><span></span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ═══════════════════ HERO ═══════════════════ -->
+    <section class="hero" id="home">
+        <div class="hero-bg">
+            <div class="hero-shape hero-shape-1"></div>
+            <div class="hero-shape hero-shape-2"></div>
+            <div class="hero-shape hero-shape-3"></div>
+            <div class="floating-leaf leaf-1">🍃</div>
+            <div class="floating-leaf leaf-2">🌱</div>
+            <div class="floating-leaf leaf-3">🍀</div>
+            <div class="floating-leaf leaf-4">🌿</div>
+        </div>
+        <div class="hero-content">
+            <div class="hero-badge">
+                <span class="badge-dot"></span>
+                AI-Powered Detection
+            </div>
+            <h1 class="hero-title">
+                Protect Your Plants<br />
+                with <span class="gradient-text">Artificial Intelligence</span>
+            </h1>
+            <p class="hero-subtitle">
+                Upload a photo of any plant leaf and our MobileNetV2 deep learning model
+                will instantly identify diseases across <strong>9 plant species</strong> and <strong>27 conditions</strong>,
+                providing actionable treatment recommendations.
+            </p>
+            <div class="hero-actions">
+                <a href="#detect" class="btn btn-primary btn-lg">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                    Start Detection
+                </a>
+                <a href="#how-it-works" class="btn btn-outline btn-lg">Learn More</a>
+            </div>
+            <div class="hero-stats">
+                <div class="stat">
+                    <span class="stat-number">9</span>
+                    <span class="stat-label">Plant Species</span>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="stat">
+                    <span class="stat-number">27</span>
+                    <span class="stat-label">Conditions</span>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="stat">
+                    <span class="stat-number">95%+</span>
+                    <span class="stat-label">Accuracy</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════ DETECTION SECTION ═══════════════════ -->
+    <section class="section detect-section" id="detect">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-tag">🔬 Disease Detection</span>
+                <h2 class="section-title">Upload & Analyze</h2>
+                <p class="section-desc">Take a clear photo of the affected plant leaf and let our AI do the rest.</p>
+            </div>
+
+            <div class="detect-grid">
+                <!-- Upload Area -->
+                <div class="upload-card" id="uploadCard">
+                    <div class="upload-zone" id="uploadZone">
+                        <input type="file" id="fileInput" accept="image/*" hidden />
+                        <div class="upload-placeholder" id="uploadPlaceholder">
+                            <div class="upload-icon">
+                                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                    <polyline points="17 8 12 3 7 8"/>
+                                    <line x1="12" y1="3" x2="12" y2="15"/>
+                                </svg>
+                            </div>
+                            <h3>Drag & Drop Your Image</h3>
+                            <p>or <span class="upload-browse">browse files</span></p>
+                            <span class="upload-hint">Supports JPG, PNG, BMP — Max 10 MB</span>
+                        </div>
+                        <div class="upload-preview" id="uploadPreview" style="display:none;">
+                            <img id="previewImage" alt="Uploaded leaf preview" />
+                            <button class="btn-remove" id="removeBtn" title="Remove image">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                            </button>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary btn-block" id="analyzeBtn" disabled>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                        Analyze Leaf
+                    </button>
+                </div>
+
+                <!-- Results Area -->
+                <div class="results-card" id="resultsCard">
+                    <!-- Empty State -->
+                    <div class="results-empty" id="resultsEmpty">
+                        <div class="empty-icon">🔍</div>
+                        <h3>Awaiting Analysis</h3>
+                        <p>Upload an image and click "Analyze Leaf" to see results here.</p>
+                    </div>
+
+                    <!-- Loading State -->
+                    <div class="results-loading" id="resultsLoading" style="display:none;">
+                        <div class="loader">
+                            <div class="loader-ring"></div>
+                            <div class="loader-ring"></div>
+                            <div class="loader-ring"></div>
+                            <span class="loader-icon">🌿</span>
+                        </div>
+                        <h3>Analyzing Your Plant...</h3>
+                        <p>Our AI model is examining the leaf for diseases.</p>
+                    </div>
+
+                    <!-- Results Content -->
+                    <div class="results-content" id="resultsContent" style="display:none;">
+                        <!-- Top Prediction -->
+                        <div class="result-top" id="resultTop">
+                            <div class="result-severity" id="resultSeverity">Healthy</div>
+                            <div class="result-header">
+                                <div>
+                                    <h3 class="result-plant" id="resultPlant">—</h3>
+                                    <p class="result-disease" id="resultDisease">—</p>
+                                </div>
+                                <div class="result-confidence-ring" id="confidenceRing">
+                                    <svg viewBox="0 0 100 100">
+                                        <circle cx="50" cy="50" r="42" class="ring-bg" />
+                                        <circle cx="50" cy="50" r="42" class="ring-fill" id="ringFill" />
+                                    </svg>
+                                    <span class="ring-text" id="ringText">0%</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Disease Info -->
+                        <div class="result-info" id="resultInfo">
+                            <div class="info-block">
+                                <h4>📋 Description</h4>
+                                <p id="resultDescription">—</p>
+                            </div>
+                            <div class="info-block">
+                                <h4>💊 Treatment</h4>
+                                <p id="resultTreatment">—</p>
+                            </div>
+                        </div>
+
+                        <!-- Other Predictions -->
+                        <div class="result-others">
+                            <h4>Other Possibilities</h4>
+                            <div class="prediction-bars" id="predictionBars"></div>
+                        </div>
+                    </div>
+
+                    <!-- Error State -->
+                    <div class="results-error" id="resultsError" style="display:none;">
+                        <div class="error-icon">⚠️</div>
+                        <h3>Analysis Failed</h3>
+                        <p id="errorMessage">Something went wrong. Please try again.</p>
+                        <button class="btn btn-outline" id="retryBtn">Try Again</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════ HOW IT WORKS ═══════════════════ -->
+    <section class="section how-section" id="how-it-works">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-tag">⚙️ Process</span>
+                <h2 class="section-title">How It Works</h2>
+                <p class="section-desc">Three simple steps to diagnose your plant's health.</p>
+            </div>
+            <div class="steps-grid">
+                <div class="step-card">
+                    <div class="step-number">01</div>
+                    <div class="step-icon">📸</div>
+                    <h3>Capture</h3>
+                    <p>Take a clear photograph of the affected plant leaf. Ensure good lighting and focus on the damaged area.</p>
+                </div>
+                <div class="step-connector">
+                    <svg width="40" height="24" viewBox="0 0 40 24"><path d="M0 12h32m0 0l-8-8m8 8l-8 8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.3"/></svg>
+                </div>
+                <div class="step-card">
+                    <div class="step-number">02</div>
+                    <div class="step-icon">🤖</div>
+                    <h3>Analyze</h3>
+                    <p>Our MobileNetV2 deep learning model processes the image and classifies it among 27 known conditions.</p>
+                </div>
+                <div class="step-connector">
+                    <svg width="40" height="24" viewBox="0 0 40 24"><path d="M0 12h32m0 0l-8-8m8 8l-8 8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.3"/></svg>
+                </div>
+                <div class="step-card">
+                    <div class="step-number">03</div>
+                    <div class="step-icon">💊</div>
+                    <h3>Treat</h3>
+                    <p>Receive a detailed diagnosis with disease information, severity level, and recommended treatment options.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════ SUPPORTED PLANTS ═══════════════════ -->
+    <section class="section plants-section" id="plants">
+        <div class="container">
+            <div class="plants-header-row">
+                <div class="section-header plants-header-left">
+                    <span class="section-tag">🌱 Crop Coverage</span>
+                    <h2 class="section-title">Supported Plants</h2>
+                    <p class="section-desc">Our vision AI identifies diseases across 9 major agricultural crops and 27 conditions.</p>
+                </div>
+                <div class="plants-download-action">
+                    <a href="#downloadModal" class="plants-app-badge-btn" id="plantsSectionDownloadBtn">
+                        <div class="app-badge-icon">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
+                                <line x1="12" y1="18" x2="12.01" y2="18"></line>
+                            </svg>
+                        </div>
+                        <div class="app-badge-text">
+                            <span class="app-badge-sub">Mobile Edition</span>
+                            <span class="app-badge-title">Download App &darr;</span>
+                        </div>
+                    </a>
+                </div>
+            </div>
+            <div class="plants-grid">
+                <div class="plant-card">
+                    <div class="plant-emoji">🍎</div>
+                    <h3>Apple</h3>
+                    <div class="plant-diseases">
+                        <span class="disease-tag disease-bad">Apple Scab</span>
+                        <span class="disease-tag disease-bad">Black Rot</span>
+                        <span class="disease-tag disease-bad">Cedar Rust</span>
+                        <span class="disease-tag disease-good">Healthy</span>
+                    </div>
+                </div>
+                <div class="plant-card">
+                    <div class="plant-emoji">🍒</div>
+                    <h3>Cherry</h3>
+                    <div class="plant-diseases">
+                        <span class="disease-tag disease-bad">Powdery Mildew</span>
+                        <span class="disease-tag disease-good">Healthy</span>
+                    </div>
+                </div>
+                <div class="plant-card">
+                    <div class="plant-emoji">🌽</div>
+                    <h3>Corn</h3>
+                    <div class="plant-diseases">
+                        <span class="disease-tag disease-bad">Common Rust</span>
+                        <span class="disease-tag disease-bad">Gray Leaf Spot</span>
+                        <span class="disease-tag disease-bad">Northern Blight</span>
+                        <span class="disease-tag disease-good">Healthy</span>
+                    </div>
+                </div>
+                <div class="plant-card">
+                    <div class="plant-emoji">🍇</div>
+                    <h3>Grape</h3>
+                    <div class="plant-diseases">
+                        <span class="disease-tag disease-bad">Black Rot</span>
+                        <span class="disease-tag disease-bad">Esca</span>
+                        <span class="disease-tag disease-bad">Leaf Blight</span>
+                        <span class="disease-tag disease-good">Healthy</span>
+                    </div>
+                </div>
+                <div class="plant-card">
+                    <div class="plant-emoji">🍑</div>
+                    <h3>Peach</h3>
+                    <div class="plant-diseases">
+                        <span class="disease-tag disease-bad">Bacterial Spot</span>
+                        <span class="disease-tag disease-good">Healthy</span>
+                    </div>
+                </div>
+                <div class="plant-card">
+                    <div class="plant-emoji">🌶️</div>
+                    <h3>Pepper</h3>
+                    <div class="plant-diseases">
+                        <span class="disease-tag disease-bad">Bacterial Spot</span>
+                        <span class="disease-tag disease-good">Healthy</span>
+                    </div>
+                </div>
+                <div class="plant-card">
+                    <div class="plant-emoji">🥔</div>
+                    <h3>Potato</h3>
+                    <div class="plant-diseases">
+                        <span class="disease-tag disease-bad">Early Blight</span>
+                        <span class="disease-tag disease-bad">Late Blight</span>
+                        <span class="disease-tag disease-good">Healthy</span>
+                    </div>
+                </div>
+                <div class="plant-card">
+                    <div class="plant-emoji">🍓</div>
+                    <h3>Strawberry</h3>
+                    <div class="plant-diseases">
+                        <span class="disease-tag disease-bad">Leaf Scorch</span>
+                        <span class="disease-tag disease-good">Healthy</span>
+                    </div>
+                </div>
+                <div class="plant-card">
+                    <div class="plant-emoji">🍅</div>
+                    <h3>Tomato</h3>
+                    <div class="plant-diseases">
+                        <span class="disease-tag disease-bad">Bacterial Spot</span>
+                        <span class="disease-tag disease-bad">Early Blight</span>
+                        <span class="disease-tag disease-bad">Late Blight</span>
+                        <span class="disease-tag disease-good">Healthy</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+
+
+      <!-- ==========================================================================
+       FREQUENTLY ASKED QUESTIONS (FAQ)
+       ========================================================================== -->
+    <a id="faq"></a>
+    <section class="section faq-section" id="faqSection">
+        <div class="container faq-container">
+            <div class="section-header">
+                <span class="section-tag">💬 Clear Answers</span>
+                <h2 class="section-title">Frequently Asked <span class="gradient-text">Questions</span></h2>
+                <p class="section-desc">
+                    Helpful answers on PlantGuard AI diagnostic precision, photo capturing guidelines, and organic plant health treatments.
+                </p>
+            </div>
+
+            <!-- FAQ Filter Categories -->
+            <div class="faq-filters" id="faqFilters" role="tablist" aria-label="FAQ Categories">
+                <button type="button" class="faq-filter-btn active" data-category="all">All Questions (6)</button>
+                <button type="button" class="faq-filter-btn" data-category="model">🔬 AI Model</button>
+                <button type="button" class="faq-filter-btn" data-category="photo">📸 Photo Guide</button>
+                <button type="button" class="faq-filter-btn" data-category="mobile">📱 Mobile & Field</button>
+                <button type="button" class="faq-filter-btn" data-category="treatment">🌿 Bio-Remedies</button>
+                <button type="button" class="faq-filter-btn" data-category="privacy">🔒 Privacy</button>
+            </div>
+
+            <!-- FAQ Accordion List -->
+            <div class="faq-list" id="faqList">
+                <!-- Item 1 -->
+                <div class="faq-item active" data-category="model">
+                    <button type="button" class="faq-question" aria-expanded="true" aria-controls="faq-ans-1">
+                        <div class="faq-q-left">
+                            <span class="faq-cat-pill">🔬 AI Model</span>
+                            <span class="faq-q-title">How accurate is the PlantGuard AI disease detection model?</span>
+                        </div>
+                        <div class="faq-chevron-wrap">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                        </div>
+                    </button>
+                    <div class="faq-answer-collapse" id="faq-ans-1" role="region">
+                        <div class="faq-answer-body">
+                            <p>Our deep convolutional neural network (MobileNetV2 architecture with transfer learning) achieves an exceptional <strong>95% to 99.2% benchmark accuracy</strong> across 27 distinct plant disease categories and healthy baselines.</p>
+                            <p style="margin-top: 10px;">The model was trained and cross-validated on more than 54,000 expert-labeled leaf images, specifically weighted to handle varied lighting, angles, and early-stage symptom detection.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Item 2 -->
+                <div class="faq-item" data-category="photo">
+                    <button type="button" class="faq-question" aria-expanded="false" aria-controls="faq-ans-2">
+                        <div class="faq-q-left">
+                            <span class="faq-cat-pill">📸 Photo Guide</span>
+                            <span class="faq-q-title">What photo quality and angle give the most reliable diagnosis?</span>
+                        </div>
+                        <div class="faq-chevron-wrap">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                        </div>
+                    </button>
+                    <div class="faq-answer-collapse" id="faq-ans-2" role="region">
+                        <div class="faq-answer-body">
+                            <p>To obtain maximum diagnostic certainty, follow these golden rules:</p>
+                            <ul class="faq-tips-list">
+                                <li><strong>Natural diffused daylight:</strong> Shoot in soft morning or overcast light. Avoid harsh direct sun reflections or intense camera flash.</li>
+                                <li><strong>Fill the frame:</strong> The infected leaf blade should fill at least <strong>60%–80%</strong> of the picture.</li>
+                                <li><strong>Focus sharply on lesions:</strong> Tap your screen to lock focus on discoloration, powdery spots, or wilting leaf margins.</li>
+                                <li><strong>Clean background:</strong> Hold a neutral hand or piece of cardboard behind the leaf if background foliage is distracting.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Item 3 -->
+                <div class="faq-item" data-category="mobile">
+                    <button type="button" class="faq-question" aria-expanded="false" aria-controls="faq-ans-3">
+                        <div class="faq-q-left">
+                            <span class="faq-cat-pill">📱 Mobile & Field</span>
+                            <span class="faq-q-title">Does PlantGuard AI work on mobile phones or offline in the field?</span>
+                        </div>
+                        <div class="faq-chevron-wrap">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                        </div>
+                    </button>
+                    <div class="faq-answer-collapse" id="faq-ans-3" role="region">
+                        <div class="faq-answer-body">
+                            <p><strong>Yes, 100%!</strong> The web application is engineered from the ground up for mobile devices with instant camera capture support on both iOS (Safari) and Android (Chrome).</p>
+                            <p style="margin-top: 10px;">Additionally, you can download our dedicated <strong>PlantGuard Mobile App (APK / PWA)</strong> from the link beside the Plants section, giving you rapid one-tap diagnoses while inspecting orchards or farms.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Item 4 -->
+                <div class="faq-item" data-category="treatment">
+                    <button type="button" class="faq-question" aria-expanded="false" aria-controls="faq-ans-4">
+                        <div class="faq-q-left">
+                            <span class="faq-cat-pill">🌿 Bio-Remedies</span>
+                            <span class="faq-q-title">Are organic treatment alternatives provided for home gardeners?</span>
+                        </div>
+                        <div class="faq-chevron-wrap">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                        </div>
+                    </button>
+                    <div class="faq-answer-collapse" id="faq-ans-4" role="region">
+                        <div class="faq-answer-body">
+                            <p>Every single diagnosed condition provides actionable management guidance tailored for both home gardeners and organic farmers:</p>
+                            <ul class="faq-tips-list">
+                                <li><strong>Biological controls:</strong> Recommendations such as <em>Bacillus subtilis</em> beneficial bacteria, copper octanoate sprays, and botanical Neem oil extracts.</li>
+                                <li><strong>Cultural practices:</strong> Sanitization methods, targeted pruning, air circulation tips, and drip irrigation practices to halt fungal spore transmission.</li>
+                                <li><strong>Commercial options:</strong> Chemical fungicide guidelines when intervention is required for large acreages.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Item 5 -->
+                <div class="faq-item" data-category="privacy">
+                    <button type="button" class="faq-question" aria-expanded="false" aria-controls="faq-ans-5">
+                        <div class="faq-q-left">
+                            <span class="faq-cat-pill">🔒 Privacy & Data</span>
+                            <span class="faq-q-title">Is my leaf photo and diagnostic history kept confidential?</span>
+                        </div>
+                        <div class="faq-chevron-wrap">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                        </div>
+                    </button>
+                    <div class="faq-answer-collapse" id="faq-ans-5" role="region">
+                        <div class="faq-answer-body">
+                            <p><strong>Your privacy is fully protected.</strong> Images uploaded for disease scanning are processed strictly in temporary runtime memory and are never retained, sold, or shared with third parties.</p>
+                            <p style="margin-top: 10px;">Diagnostic logs and scan records reside solely inside your personal browser's LocalStorage, meaning you retain complete ownership and can clear your history anytime with zero footprints left behind.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Item 6 -->
+                <div class="faq-item" data-category="model">
+                    <button type="button" class="faq-question" aria-expanded="false" aria-controls="faq-ans-6">
+                        <div class="faq-q-left">
+                            <span class="faq-cat-pill">🌱 Crop Coverage</span>
+                            <span class="faq-q-title">Which 9 plant species and diseases are currently supported?</span>
+                        </div>
+                        <div class="faq-chevron-wrap">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                        </div>
+                    </button>
+                    <div class="faq-answer-collapse" id="faq-ans-6" role="region">
+                        <div class="faq-answer-body">
+                            <p>PlantGuard AI currently covers <strong>Apple, Cherry, Corn (Maize), Grape, Peach, Pepper (Bell), Potato, Strawberry, and Tomato</strong>.</p>
+                            <p style="margin-top: 10px;">Supported conditions include Early Blight, Late Blight, Bacterial Spot, Powdery Mildew, Black Rot, Esca, Cedar Rust, Common Rust, Gray Leaf Spot, Northern Leaf Blight, Leaf Scorch, alongside verified healthy controls for every crop.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FAQ CTA Card -->
+            <div class="faq-cta-card">
+                <div class="faq-cta-icon-wrap">
+                    <span class="faq-cta-emoji">🌿</span>
+                </div>
+                <div class="faq-cta-text">
+                    <h4>Have a suspect leaf ready to diagnose?</h4>
+                    <p>Upload your photograph now to get instant disease classification, confidence scores, and tailored remedy plans.</p>
+                </div>
+                <div class="faq-cta-action">
+                    <a href="#detect" class="btn btn-primary faq-cta-btn">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        Scan Leaf Now
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════ FOOTER ═══════════════════ -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <span class="logo-icon">🌿</span>
+                    <span class="logo-text">PlantGuard<span class="logo-accent">AI</span></span>
+                    <p>AI-powered plant disease detection using MobileNetV2 deep learning.</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Quick Links</h4>
+                    <a href="#home">Home</a>
+                    <a href="#detect">Detect Disease</a>
+                    <a href="#how-it-works">How It Works</a>
+                    <a href="#plants">Supported Plants</a>
+                    <a href="#downloadModal" onclick="document.getElementById('downloadModal').classList.add('open'); document.body.style.overflow='hidden'; return false;">Download App</a>
+                    <a href="#faqSection">FAQs</a>
+                </div>
+                <div class="footer-tech">
+                    <h4>Technology</h4>
+                    <a href="#">MobileNetV2</a>
+                    <a href="#">Pytorch</a>
+                    <a href="#">FastAPI</a>
+                    <a href="#">Transfer Learning</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>© 2026 PlantGuard AI — Built with 💚 for healthier plants.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ═══════════════════ DOWNLOAD APP MODAL ═══════════════════ -->
+    <div class="modal-backdrop" id="downloadModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <div class="modal-card">
+            <button type="button" class="modal-close-btn" id="closeModalBtn" aria-label="Close modal">&times;</button>
+            <div class="modal-header">
+                <div class="modal-icon-badge">📱</div>
+                <div class="modal-title-group">
+                    <span class="modal-badge-pill">PlantGuard Mobile v2.4</span>
+                    <h3 id="modalTitle">Get the PlantGuard App</h3>
+                    <p>Instant plant disease diagnostics in your pocket — free, fast, and orchard-ready.</p>
+                </div>
+            </div>
+
+            <div class="modal-body">
+                <div class="modal-options-grid">
+                    <!-- Option 1: Direct APK Download -->
+                    <div class="download-opt-card">
+                        <div class="opt-header">
+                            <span class="opt-platform-icon">🤖</span>
+                            <div>
+                                <h4>Android Edition</h4>
+                                <span class="opt-meta">Direct APK • 28.4 MB • Android 8.0+</span>
+                            </div>
+                        </div>
+                        <p class="opt-desc">Install directly on your phone or tablet. Works offline in rural areas with full camera integration.</p>
+                        <a href="#" class="btn btn-primary btn-full download-apk-btn" id="downloadApkBtn" onclick="alert('Downloading PlantGuard AI Android APK v2.4 (28.4 MB)...'); return false;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                            Download APK (Free)
+                        </a>
+                    </div>
+
+                    <!-- Option 2: iOS / PWA Install -->
+                    <div class="download-opt-card">
+                        <div class="opt-header">
+                            <span class="opt-platform-icon">🍏</span>
+                            <div>
+                                <h4>iOS & Web App (PWA)</h4>
+                                <span class="opt-meta">No App Store Needed • Instant</span>
+                            </div>
+                        </div>
+                        <p class="opt-desc">Open in Safari or Chrome, tap <strong>Share</strong> &gt; <strong>Add to Home Screen</strong> for an app-like fullscreen experience.</p>
+                        <button type="button" class="btn btn-outline btn-full" id="pwaInstallBtn" onclick="alert('To install on iPhone/iPad: Tap Share in Safari and choose \'Add to Home Screen\'. On Android: Tap browser menu and choose \'Install App\'.');">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v13M5 8l7-7 7 7M2 17v3a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-3"/></svg>
+                            Install Web App
+                        </button>
+                    </div>
+                </div>
+
+                <!-- QR Code quick scan area -->
+                <div class="modal-qr-section">
+                    <div class="qr-mockup">
+                        <svg width="84" height="84" viewBox="0 0 100 100" fill="currentColor">
+                            <rect width="100" height="100" fill="var(--white)"/>
+                            <rect x="10" y="10" width="28" height="28" fill="#16a34a"/>
+                            <rect x="15" y="15" width="18" height="18" fill="var(--white)"/>
+                            <rect x="19" y="19" width="10" height="10" fill="#16a34a"/>
+                            <rect x="62" y="10" width="28" height="28" fill="#16a34a"/>
+                            <rect x="67" y="15" width="18" height="18" fill="var(--white)"/>
+                            <rect x="71" y="19" width="10" height="10" fill="#16a34a"/>
+                            <rect x="10" y="62" width="28" height="28" fill="#16a34a"/>
+                            <rect x="15" y="67" width="18" height="18" fill="var(--white)"/>
+                            <rect x="19" y="71" width="10" height="10" fill="#16a34a"/>
+                            <rect x="45" y="15" width="8" height="8" fill="#16a34a"/>
+                            <rect x="45" y="30" width="8" height="8" fill="#16a34a"/>
+                            <rect x="45" y="62" width="8" height="8" fill="#16a34a"/>
+                            <rect x="62" y="45" width="8" height="8" fill="#16a34a"/>
+                            <rect x="78" y="45" width="12" height="8" fill="#16a34a"/>
+                            <rect x="62" y="62" width="12" height="12" fill="#16a34a"/>
+                            <rect x="78" y="78" width="12" height="12" fill="#16a34a"/>
+                            <rect x="45" y="78" width="8" height="12" fill="#16a34a"/>
+                        </svg>
+                    </div>
+                    <div class="qr-text">
+                        <strong>Scan with Phone Camera</strong>
+                        <span>Point your phone camera at this QR code to open PlantGuard AI directly on your mobile device.</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════ THEME, FAQ & MODAL SCRIPTS ═══════════════════ -->
+    <script>
+    (function() {
+        // --- 1. THEME TOGGLE (LIGHT / DARK) ---
+        const themeToggleBtn = document.getElementById('themeToggleBtn');
+        function setTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            try { localStorage.setItem('plantguard_theme', theme); } catch(e) {}
+        }
+        function getCurrentTheme() {
+            return document.documentElement.getAttribute('data-theme') || 'light';
+        }
+        if (themeToggleBtn) {
+            themeToggleBtn.addEventListener('click', () => {
+                const nextTheme = getCurrentTheme() === 'dark' ? 'light' : 'dark';
+                setTheme(nextTheme);
+            });
+        }
+
+        // --- 2. FAQ ACCORDION INTERACTIVITY ---
+        const faqItems = document.querySelectorAll('.faq-item');
+        faqItems.forEach(item => {
+            const btn = item.querySelector('.faq-question');
+            if (!btn) return;
+            btn.addEventListener('click', () => {
+                const isActive = item.classList.contains('active');
+                faqItems.forEach(other => {
+                    if (other !== item) {
+                        other.classList.remove('active');
+                        const otherBtn = other.querySelector('.faq-question');
+                        if (otherBtn) otherBtn.setAttribute('aria-expanded', 'false');
+                    }
+                });
+                if (isActive) {
+                    item.classList.remove('active');
+                    btn.setAttribute('aria-expanded', 'false');
+                } else {
+                    item.classList.add('active');
+                    btn.setAttribute('aria-expanded', 'true');
+                }
+            });
+        });
+
+        // FAQ Category Filter
+        const filterBtns = document.querySelectorAll('.faq-filter-btn');
+        filterBtns.forEach(fBtn => {
+            fBtn.addEventListener('click', () => {
+                filterBtns.forEach(b => b.classList.remove('active'));
+                fBtn.classList.add('active');
+                const cat = fBtn.getAttribute('data-category');
+                faqItems.forEach(item => {
+                    const itemCat = item.getAttribute('data-category');
+                    if (cat === 'all' || itemCat === cat) {
+                        item.style.display = 'block';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+            });
+        });
+
+        // --- 3. DOWNLOAD APP MODAL LOGIC ---
+        const downloadModal = document.getElementById('downloadModal');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const openModalTriggers = [
+            document.getElementById('navDownloadBtn'),
+            document.getElementById('plantsSectionDownloadBtn')
+        ].filter(Boolean);
+
+        function openModal(e) {
+            if (e) e.preventDefault();
+            if (downloadModal) {
+                downloadModal.classList.add('open');
+                document.body.style.overflow = 'hidden';
+            }
+        }
+        function closeModal() {
+            if (downloadModal) {
+                downloadModal.classList.remove('open');
+                document.body.style.overflow = '';
+            }
+        }
+
+        openModalTriggers.forEach(trigger => {
+            trigger.addEventListener('click', openModal);
+        });
+
+        if (closeModalBtn) {
+            closeModalBtn.addEventListener('click', closeModal);
+        }
+
+        if (downloadModal) {
+            downloadModal.addEventListener('click', (e) => {
+                if (e.target === downloadModal) {
+                    closeModal();
+                }
+            });
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && downloadModal && downloadModal.classList.contains('open')) {
+                closeModal();
+            }
+        });
+    })();
+    </script>
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
