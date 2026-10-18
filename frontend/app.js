@@ -157,10 +157,15 @@ async function analyzeImage() {
 
     try {
         // Determine backend predict URL (works on Live Server and when served directly by FastAPI)
-        const backendHost = window.location.hostname === 'localhost' ? 'localhost' : '127.0.0.1';
-        const predictUrl = (window.location.protocol.startsWith('http') && window.location.port === '8000')
-            ? '/api/predict'
-            : `http://${backendHost}:8000/api/predict`;
+
+        /* for running in local machine */
+
+        // const backendHost = window.location.hostname === 'localhost' ? 'localhost' : '127.0.0.1';
+        // const predictUrl = (window.location.protocol.startsWith('http') && window.location.port === '8000')
+        //     ? '/api/predict'
+        //     : `http://${backendHost}:8000/api/predict`;
+
+        const predictUrl = 'https://plant-disease-detection-1-44wp.onrender.com/api/predict';
 
         const response = await fetch(
             predictUrl,
