@@ -19,7 +19,7 @@ from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.requests import Request
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 
 import torch
@@ -27,9 +27,11 @@ import torch.nn as nn
 from torchvision import models, transforms
 
 # ──────────────────────────────────────────────
-# Configuration
+# Configuration & Paths
 # ──────────────────────────────────────────────
-MODEL_DIR = os.path.join(os.path.dirname(__file__), "model")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+FRONTEND_DIR = os.path.join(BASE_DIR, "frontend")
+MODEL_DIR = os.path.join(BASE_DIR, "model")
 MODEL_PATH = os.path.join(MODEL_DIR, "plant_disease_mobilenetv2.pth")
 CLASS_NAMES_PATH = os.path.join(MODEL_DIR, "class_names.json")
 IMG_SIZE = 224
@@ -266,11 +268,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Mount static files
-app.mount("/static", StaticFiles(directory="static"), name="static")
+# Mount static / frontend assets safely if directories exist
+if os.path.exists(os.path.join(BASE_DIR, "static")):
+    app.mount("/static", StaticFiles(directory=os.path.join(BASE_DIR, "static")), name="static")
+elif os.path.exists(FRONTEND_DIR):
+    app.mount("/static", StaticFiles(directory=FRONTEND_DIR), name="static")
 
-# Templates
-templates = Jinja2Templates(directory="templates")
+if os.path.exists(FRONTEND_DIR):
+    app.mount("/frontend", StaticFiles(directory=FRONTEND_DIR), name="frontend_dir")
+
+templates = Jinja2Templates(directory="templates") if os.path.exists(os.path.join(BASE_DIR, "templates")) else None
 
 # Globals
 model = None
@@ -285,13 +292,18 @@ inference_transform = transforms.Compose([
 ])
 
 
-@app.on_event("startup")
-async def startup_load_model():
-    """Load the trained PyTorch model and class names on startup."""
+def load_model_and_classes():
+    """Load the trained PyTorch model and class names safely."""
     global model, class_names
+    if model is not None and class_names is not None:
+        return True
 
-    # Try loading the checkpoint first — it contains class_names inside it
-    if os.path.exists(MODEL_PATH):
+    if not os.path.exists(MODEL_PATH):
+        print(f"[WARNING] Model file not found: {MODEL_PATH}")
+        print("  Run the training notebook first to train and save the model.")
+        return False
+
+    try:
         checkpoint = torch.load(MODEL_PATH, map_location=device, weights_only=False)
 
         # Extract class names from checkpoint (training notebook embeds them)
@@ -304,23 +316,34 @@ async def startup_load_model():
             print(f"[OK] Loaded {len(class_names)} class names from {CLASS_NAMES_PATH}")
         else:
             print(f"[WARNING] Class names not found in checkpoint or {CLASS_NAMES_PATH}")
-            print("  Run the training notebook first to generate class names.")
-            return
+            return False
 
         num_classes = checkpoint.get('num_classes', len(class_names))
         model = load_pytorch_model(MODEL_PATH, num_classes, device)
         print(f"[OK] PyTorch model loaded from: {MODEL_PATH}")
         print(f"  Device: {device}")
         print(f"  Classes: {class_names}")
-    else:
-        print(f"[WARNING] Model file not found: {MODEL_PATH}")
-        print("  Run the training notebook first to train and save the model.")
+        return True
+    except Exception as e:
+        print(f"[ERROR] Failed to load model: {e}")
+        return False
+
+
+@app.on_event("startup")
+async def startup_load_model():
+    """Load the trained PyTorch model and class names on startup."""
+    load_model_and_classes()
 
 
 @app.get("/")
 async def home(request: Request):
-    """Serve the main page."""
-    return templates.TemplateResponse("index.html", {"request": request})
+    """Serve the main page from frontend directory."""
+    index_path = os.path.join(FRONTEND_DIR, "index.html")
+    if os.path.exists(index_path):
+        return FileResponse(index_path)
+    if templates and os.path.exists(os.path.join(BASE_DIR, "templates", "index.html")):
+        return templates.TemplateResponse("index.html", {"request": request})
+    return JSONResponse(status_code=404, content={"detail": "Frontend index.html not found"})
 
 
 @app.get("/api/health")
@@ -341,11 +364,17 @@ async def predict(file: UploadFile = File(...)):
     Predict disease from an uploaded plant leaf image.
     Returns top 5 predictions with confidence scores and disease info.
     """
+    global model, class_names
+
+    # Auto-load model on-demand if needed
+    if model is None or class_names is None:
+        load_model_and_classes()
+
     # Validate model is loaded
     if model is None or class_names is None:
         raise HTTPException(
             status_code=503,
-            detail="Model not loaded. Please train the model first using the training notebook."
+            detail="Model not loaded. Please verify the model file in the model/ directory."
         )
 
     # Validate file type
@@ -406,6 +435,11 @@ async def predict(file: UploadFile = File(...)):
             status_code=500,
             detail=f"Error processing image: {str(e)}"
         )
+
+
+# Mount root frontend directory for static assets (style.css, app.js, etc.)
+if os.path.exists(FRONTEND_DIR):
+    app.mount("/", StaticFiles(directory=FRONTEND_DIR, html=True), name="frontend_root")
 
 
 if __name__ == "__main__":

@@ -156,9 +156,14 @@ async function analyzeImage() {
     formData.append('file', selectedFile);
 
     try {
-        // Explicitly call FastAPI on port 8000
+        // Determine backend predict URL (works on Live Server and when served directly by FastAPI)
+        const backendHost = window.location.hostname === 'localhost' ? 'localhost' : '127.0.0.1';
+        const predictUrl = (window.location.protocol.startsWith('http') && window.location.port === '8000')
+            ? '/api/predict'
+            : `http://${backendHost}:8000/api/predict`;
+
         const response = await fetch(
-            'http://127.0.0.1:8000/api/predict',
+            predictUrl,
             {
                 method: 'POST',
                 body: formData
