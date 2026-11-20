@@ -101,7 +101,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Validate file type
         const validTypes = ['image/jpeg', 'image/png', 'image/bmp', 'image/jpg', 'image/webp'];
         if (!validTypes.includes(file.type)) {
-            showError('Invalid file type. Please upload a JPG, PNG, or BMP image.');
+            showError('Invalid file type. Please upload a JPG, PNG, BMP, or WebP image.');
             return;
         }
 
@@ -156,16 +156,7 @@ async function analyzeImage() {
     formData.append('file', selectedFile);
 
     try {
-        // Determine backend predict URL (works on Live Server and when served directly by FastAPI)
-
-        /* for running in local machine */
-
-        // const backendHost = window.location.hostname === 'localhost' ? 'localhost' : '127.0.0.1';
-        // const predictUrl = (window.location.protocol.startsWith('http') && window.location.port === '8000')
-        //     ? '/api/predict'
-        //     : `http://${backendHost}:8000/api/predict`;
-
-        const predictUrl = 'https://plant-disease-detection-1-44wp.onrender.com/api/predict';
+        const predictUrl = '/api/predict';
 
         const response = await fetch(
             predictUrl,

@@ -13,7 +13,7 @@ import io
 import json
 import numpy as np
 import uvicorn
-from PIL import Image
+from PIL import Image, UnidentifiedImageError
 
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.staticfiles import StaticFiles
@@ -35,6 +35,7 @@ MODEL_DIR = os.path.join(BASE_DIR, "model")
 MODEL_PATH = os.path.join(MODEL_DIR, "plant_disease_mobilenetv2.pth")
 CLASS_NAMES_PATH = os.path.join(MODEL_DIR, "class_names.json")
 IMG_SIZE = 224
+MAX_UPLOAD_BYTES = 10 * 1024 * 1024
 
 # ImageNet normalization (same as training)
 IMAGENET_MEAN = [0.485, 0.456, 0.406]
@@ -227,6 +228,10 @@ DISEASE_INFO = {
     }
 }
 
+DISEASE_INFO_NORMALIZED = {
+    key.casefold(): value for key, value in DISEASE_INFO.items()
+}
+
 
 # ──────────────────────────────────────────────
 # Model loading helper
@@ -286,7 +291,8 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Inference transform (must match validation transform from training)
 inference_transform = transforms.Compose([
-    transforms.Resize((IMG_SIZE, IMG_SIZE)),
+    transforms.Resize(256),
+    transforms.CenterCrop(IMG_SIZE),
     transforms.ToTensor(),
     transforms.Normalize(IMAGENET_MEAN, IMAGENET_STD),
 ])
@@ -381,16 +387,29 @@ async def predict(file: UploadFile = File(...)):
     if not file.content_type or not file.content_type.startswith("image/"):
         raise HTTPException(
             status_code=400,
-            detail="Uploaded file is not an image. Please upload a JPG, PNG, or BMP image."
+            detail="Uploaded file is not an image. Please upload a supported image file."
+        )
+
+    contents = await file.read(MAX_UPLOAD_BYTES + 1)
+    await file.close()
+    if len(contents) > MAX_UPLOAD_BYTES:
+        raise HTTPException(
+            status_code=413,
+            detail="Image is too large. Maximum size is 10 MB."
         )
 
     try:
-        # Read and preprocess image
-        contents = await file.read()
-        image = Image.open(io.BytesIO(contents)).convert("RGB")
-        img_tensor = inference_transform(image).unsqueeze(0).to(device)
+        with Image.open(io.BytesIO(contents)) as image:
+            image.verify()
+        with Image.open(io.BytesIO(contents)) as image:
+            img_tensor = inference_transform(image.convert("RGB")).unsqueeze(0).to(device)
+    except (UnidentifiedImageError, OSError, ValueError, Image.DecompressionBombError) as e:
+        raise HTTPException(
+            status_code=400,
+            detail="The uploaded file is not a valid or supported image."
+        ) from e
 
-        # Make prediction
+    try:
         with torch.no_grad():
             outputs = model(img_tensor)
             probabilities = torch.softmax(outputs, dim=1)[0]
@@ -403,12 +422,12 @@ async def predict(file: UploadFile = File(...)):
         for idx in top_indices:
             class_name = class_names[idx]
             parts = class_name.split("___")
-            plant = parts[0]
+            plant = parts[0].replace(",", "").replace("_", " ").strip()
             disease = parts[1].replace("_", " ") if len(parts) > 1 else "Plant Foliage"
 
             # Look up disease info
-            info_key = class_name.replace(" ", "_")
-            disease_data = DISEASE_INFO.get(info_key, {
+            info_key = class_name.replace(" ", "_").casefold()
+            disease_data = DISEASE_INFO_NORMALIZED.get(info_key, {
                 "description": "No information available for this condition.",
                 "treatment": "Consult a local agricultural extension service for guidance.",
                 "severity": "unknown"
@@ -429,12 +448,11 @@ async def predict(file: UploadFile = File(...)):
             "predictions": results,
             "top_prediction": results[0] if results else None
         })
-
     except Exception as e:
         raise HTTPException(
             status_code=500,
             detail=f"Error processing image: {str(e)}"
-        )
+        ) from e
 
 
 # Mount root frontend directory for static assets (style.css, app.js, etc.)

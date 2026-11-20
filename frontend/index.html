@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="/static/style.css" />
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌿</text></svg>" />
     <script>
         (function() {
@@ -97,7 +97,7 @@
             </h1>
             <p class="hero-subtitle">
                 Upload a photo of any plant leaf and our MobileNetV2 deep learning model
-                will instantly identify diseases across <strong>9 plant species</strong> and <strong>27 conditions</strong>,
+                will classify leaf images across <strong>14 plant species</strong> and <strong>38 classes</strong>,
                 providing actionable treatment recommendations.
             </p>
             <div class="hero-actions">
@@ -109,18 +109,18 @@
             </div>
             <div class="hero-stats">
                 <div class="stat">
-                    <span class="stat-number">9</span>
+                    <span class="stat-number">14</span>
                     <span class="stat-label">Plant Species</span>
                 </div>
                 <div class="stat-divider"></div>
                 <div class="stat">
-                    <span class="stat-number">27</span>
-                    <span class="stat-label">Conditions</span>
+                    <span class="stat-number">38</span>
+                    <span class="stat-label">Classes</span>
                 </div>
                 <div class="stat-divider"></div>
                 <div class="stat">
-                    <span class="stat-number">95%+</span>
-                    <span class="stat-label">Accuracy</span>
+                    <span class="stat-number">224</span>
+                    <span class="stat-label">Pixel Input</span>
                 </div>
             </div>
         </div>
@@ -150,7 +150,7 @@
                             </div>
                             <h3>Drag & Drop Your Image</h3>
                             <p>or <span class="upload-browse">browse files</span></p>
-                            <span class="upload-hint">Supports JPG, PNG, BMP — Max 10 MB</span>
+                            <span class="upload-hint">Supports JPG, PNG, BMP, WebP — Max 10 MB</span>
                         </div>
                         <div class="upload-preview" id="uploadPreview" style="display:none;">
                             <img id="previewImage" alt="Uploaded leaf preview" />
@@ -259,7 +259,7 @@
                     <div class="step-number">02</div>
                     <div class="step-icon">🤖</div>
                     <h3>Analyze</h3>
-                    <p>Our MobileNetV2 deep learning model processes the image and classifies it among 27 known conditions.</p>
+                    <p>Our MobileNetV2 model processes the image and classifies it among 38 plant-disease and healthy-leaf classes.</p>
                 </div>
                 <div class="step-connector">
                     <svg width="40" height="24" viewBox="0 0 40 24"><path d="M0 12h32m0 0l-8-8m8 8l-8 8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.3"/></svg>
@@ -281,7 +281,7 @@
                 <div class="section-header plants-header-left">
                     <span class="section-tag">🌱 Crop Coverage</span>
                     <h2 class="section-title">Supported Plants</h2>
-                    <p class="section-desc">Our vision AI identifies diseases across 9 major agricultural crops and 27 conditions.</p>
+                    <p class="section-desc">Our vision AI classifies leaves across 14 plant species and 38 disease or healthy-leaf classes.</p>
                 </div>
                 <div class="plants-download-action">
                     <a href="https://drive.google.com/drive/folders/11VOvWhq4AAYxe6eZ1dElg188s2VvMgKe?usp=drive_link" target="_blank" rel="noopener noreferrer" class="plants-app-badge-btn" id="plantsSectionDownloadBtn">
@@ -380,6 +380,41 @@
                         <span class="disease-tag disease-good">Healthy</span>
                     </div>
                 </div>
+                <div class="plant-card">
+                    <div class="plant-emoji">🫐</div>
+                    <h3>Blueberry</h3>
+                    <div class="plant-diseases">
+                        <span class="disease-tag disease-good">Healthy</span>
+                    </div>
+                </div>
+                <div class="plant-card">
+                    <div class="plant-emoji">🍊</div>
+                    <h3>Orange</h3>
+                    <div class="plant-diseases">
+                        <span class="disease-tag disease-bad">Huanglongbing</span>
+                    </div>
+                </div>
+                <div class="plant-card">
+                    <div class="plant-emoji">🌿</div>
+                    <h3>Raspberry</h3>
+                    <div class="plant-diseases">
+                        <span class="disease-tag disease-good">Healthy</span>
+                    </div>
+                </div>
+                <div class="plant-card">
+                    <div class="plant-emoji">🫘</div>
+                    <h3>Soybean</h3>
+                    <div class="plant-diseases">
+                        <span class="disease-tag disease-good">Healthy</span>
+                    </div>
+                </div>
+                <div class="plant-card">
+                    <div class="plant-emoji">🎃</div>
+                    <h3>Squash</h3>
+                    <div class="plant-diseases">
+                        <span class="disease-tag disease-bad">Powdery Mildew</span>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
@@ -426,8 +461,8 @@
                     </button>
                     <div class="faq-answer-collapse" id="faq-ans-1" role="region">
                         <div class="faq-answer-body">
-                            <p>Our deep convolutional neural network (MobileNetV2 architecture with transfer learning) achieves an exceptional <strong>95% to 99.2% benchmark accuracy</strong> across 27 distinct plant disease categories and healthy baselines.</p>
-                            <p style="margin-top: 10px;">The model was trained and cross-validated on more than 54,000 expert-labeled leaf images, specifically weighted to handle varied lighting, angles, and early-stage symptom detection.</p>
+                            <p>The notebook trains a MobileNetV2 model on <strong>70,295 training images</strong> across 38 classes, then evaluates it on a separate validation split of 17,572 images.</p>
+                            <p style="margin-top: 10px;">The dataset has no separate test folder, so the notebook reports validation performance rather than independent test accuracy. Model confidence is not a guarantee of diagnosis.</p>
                         </div>
                     </div>
                 </div>
@@ -522,7 +557,7 @@
                     <button type="button" class="faq-question" aria-expanded="false" aria-controls="faq-ans-6">
                         <div class="faq-q-left">
                             <span class="faq-cat-pill">🌱 Crop Coverage</span>
-                            <span class="faq-q-title">Which 9 plant species and diseases are currently supported?</span>
+                            <span class="faq-q-title">Which 14 plant species and classes are supported?</span>
                         </div>
                         <div class="faq-chevron-wrap">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
@@ -530,8 +565,8 @@
                     </button>
                     <div class="faq-answer-collapse" id="faq-ans-6" role="region">
                         <div class="faq-answer-body">
-                            <p>PlantGuard AI currently covers <strong>Apple, Cherry, Corn (Maize), Grape, Peach, Pepper (Bell), Potato, Strawberry, and Tomato</strong>.</p>
-                            <p style="margin-top: 10px;">Supported conditions include Early Blight, Late Blight, Bacterial Spot, Powdery Mildew, Black Rot, Esca, Cedar Rust, Common Rust, Gray Leaf Spot, Northern Leaf Blight, Leaf Scorch, alongside verified healthy controls for every crop.</p>
+                            <p>PlantGuard AI covers <strong>Apple, Blueberry, Cherry, Corn (Maize), Grape, Orange, Peach, Bell Pepper, Potato, Raspberry, Soybean, Squash, Strawberry, and Tomato</strong>.</p>
+                            <p style="margin-top: 10px;">The 38 classes include crop-specific diseases such as blights, rusts, spots, mildew, and Huanglongbing, plus healthy-leaf classes where available.</p>
                         </div>
                     </div>
                 </div>
